@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Intraoperative Nursing | Perioperative Mastery | AORN Guidelines</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .transition-all { transition: all 0.3s ease; }
+        .recall-mode .reveal-text {
+            background-color: #cbd5e1;
+            color: transparent;
+            border-radius: 0.375rem;
+            padding: 0 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            box-shadow: inset 0 0 0 1px #94a3b8;
+        }
+        .recall-mode .reveal-text:hover,
+        .recall-mode .reveal-text.revealed {
+            background-color: #fef08a;
+            color: #1e293b;
+            box-shadow: none;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #0f5c6b; border-radius: 8px; }
+        .content-section { animation: fade 0.3s ease; }
+        @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-feedback-correct { background-color: #dcfce7; border-left: 4px solid #22c55e; }
+        .quiz-feedback-wrong { background-color: #fee2e2; border-left: 4px solid #ef4444; }
+        .locked-section { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
+        .flashcard { background: #fff; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer; border: 1px solid #e2e8f0; }
+        .flashcard:hover { transform: translateY(-5px); }
+        .warning-box { background-color: #fee2e2; border-left: 6px solid #dc2626; padding: 1rem; border-radius: 0.75rem; margin: 1rem 0; }
+        .success-box { background-color: #dcfce7; border-left: 6px solid #16a34a; padding: 1rem; border-radius: 0.75rem; margin: 1rem 0; }
+        .info-box { background-color: #e0f2fe; border-left: 6px solid #0284c7; padding: 1rem; border-radius: 0.75rem; margin: 1rem 0; }
+        .highlight-red { color: #b91c1c; font-weight: 800; background: #fee2e2; display: inline-block; padding: 0 4px; border-radius: 6px; }
+        .highlight-green { color: #166534; font-weight: 800; background: #dcfce7; display: inline-block; padding: 0 4px; border-radius: 6px; }
+        .key-stat { font-size: 1.8rem; font-weight: 900; color: #0f5c6b; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { periop: { light: '#e0f2fe', DEFAULT: '#0f5c6b', dark: '#083c44' } } } }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 h-screen flex flex-col md:flex-row font-sans text-slate-800 overflow-hidden">
+
+    <div class="md:hidden bg-periop-dark text-white p-4 flex justify-between items-center shadow-md z-30 shrink-0">
+        <button onclick="toggleMobileMenu()" class="text-white focus:outline-none z-40">
+            <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+        <h1 class="font-bold text-lg absolute left-1/2 transform -translate-x-1/2 pointer-events-none">
+            <i class="fa-solid fa-syringe mr-2"></i> Intraop Nursing
+        </h1>
+        <div class="w-8"></div>
+    </div>
+
+    <nav id="sidebar" class="hidden md:flex flex-col w-full md:w-80 bg-white shadow-2xl h-full absolute md:relative z-30 transition-transform duration-300 shrink-0 border-r border-slate-200">
+        <div class="p-6 bg-gradient-to-br from-periop-dark to-periop text-white hidden md:block shrink-0">
+            <h1 class="font-black text-2xl tracking-wide"><i class="fa-regular fa-hand-peace mr-2"></i> Intraoperative<br>Nursing</h1>
+            <p class="text-sm text-cyan-200 mt-1 font-medium">Perioperative · AORN 2025</p>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 text-sm font-medium">
+                <li><button onclick="showSection('home')" id="btn-home" class="nav-btn w-full text-left px-6 py-3 bg-periop-light text-periop-dark border-r-4 border-periop-dark transition-colors"><i class="fa-solid fa-house w-6 nav-icon"></i><i class="fa-solid fa-lock w-6 hidden"></i> Home / Start</button></li>
+                <li><button onclick="showSection('overview')" id="btn-overview" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-people-arrows w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Overview & Team Roles</button></li>
+                <li><button onclick="showSection('clinical')" id="btn-clinical" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-chart-simple w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Intraoperative Phases</button></li>
+                <li><button onclick="showSection('phases')" id="btn-phases" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-list-check w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Key Nursing Responsibilities</button></li>
+                <li><button onclick="showSection('warning')" id="btn-warning" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-triangle-exclamation w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Complications & Early Signs</button></li>
+                <li><button onclick="showSection('management')" id="btn-management" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-thermometer-half w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Safety & Aseptic Management</button></li>
+                <li><button onclick="showSection('nursing')" id="btn-nursing" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-clipboard-list w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Nursing Care & Counts</button></li>
+                <li><button onclick="showSection('prevention')" id="btn-prevention" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-shield-virus w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> SSI Prevention & Safety Checklist</button></li>
+                <li><button onclick="showSection('flashcards')" id="btn-flashcards" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-200 mt-2 locked-section"><i class="fa-solid fa-cards w-6 text-periop nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Flashcards & Mnemonics</button></li>
+                <li><button onclick="showSection('final_quiz_sec')" id="btn-final_quiz_sec" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-graduation-cap w-6 text-amber-500 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Final 50‑Item Exam</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="flex-1 h-full overflow-y-auto bg-slate-100 relative w-full">
+        <div class="fixed top-16 md:top-4 right-4 md:right-8 z-40 flex items-center bg-white/90 backdrop-blur px-4 py-3 rounded-full shadow-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleRecallMode()">
+            <span class="mr-3 text-sm font-bold text-slate-700 hidden md:inline"><i class="fa-solid fa-brain text-periop mr-1"></i> Active Recall</span>
+            <button id="recall-toggle" class="w-12 h-6 bg-slate-300 rounded-full relative transition-colors duration-300 focus:outline-none shadow-inner pointer-events-none">
+                <div id="recall-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow"></div>
+            </button>
+        </div>
+
+        <div class="p-4 md:p-8 max-w-6xl mx-auto pb-32">
+            <!-- HOME SECTION -->
+            <section id="home" class="content-section flex flex-col items-center justify-center min-h-[80vh] text-center block">
+                <div class="bg-gradient-to-br from-slate-800 to-periop-dark text-white rounded-3xl shadow-2xl p-10 md:p-16 w-full relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-10 -mr-10 text-white opacity-5 pointer-events-none"><i class="fa-solid fa-scalpel text-[20rem]"></i></div>
+                    <div class="relative z-10">
+                        <div class="bg-white/10 backdrop-blur-sm inline-block p-4 rounded-full text-cyan-300 mb-6 shadow-sm border border-white/20">
+                            <i class="fa-solid fa-hand-holding-heart text-5xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-300 mb-2 uppercase tracking-widest">Perioperative Nursing Mastery</h3>
+                        <h1 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight drop-shadow-md">Intraoperative Nursing</h1>
+                        <div class="bg-white/10 backdrop-blur inline-block px-6 py-3 rounded-full mb-10 border border-white/20">
+                            <p class="text-lg text-white font-medium">Scrub role · Circulating nurse · Aseptic technique · Positioning · Surgical counts · Emergency readiness | <strong>AORN Guidelines 2025</strong></p>
+                        </div>
+                        <button onclick="unlockFirstSection()" class="bg-slate-600 hover:bg-slate-500 text-white font-black py-4 px-10 rounded-full shadow-xl transition-transform hover:scale-105 text-lg flex items-center mx-auto focus:outline-none">
+                            Begin Module <i class="fa-solid fa-arrow-right ml-3"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 1. OVERVIEW & TEAM ROLES (enhanced visual) -->
+            <section id="overview" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-periop pb-3"><i class="fa-solid fa-people-arrows text-periop mr-4"></i> Overview & Intraoperative Team Roles</h2>
+                    <p><strong>Intraoperative nursing</strong> encompasses patient care during the surgical procedure, from induction of anesthesia to emergence. Key roles: <span class="reveal-text font-bold">circulating nurse (manages environment, documentation, unsterile supplies)</span>, <span class="reveal-text font-bold">scrub nurse (maintains sterile field, passes instruments)</span>, <span class="reveal-text font-bold">surgical first assistant</span>. Primary goals: prevent infection, maintain safety, ensure hemostasis, and teamwork.</p>
+                    <div class="warning-box mt-4"><i class="fa-solid fa-skull-crosswalk mr-2 text-red-700"></i> <span class="font-bold text-red-800">CRITICAL:</span> <span class="reveal-text">Communication breakdown is the <span class="highlight-red">leading cause of retained surgical items and wrong-site surgery</span>. Standardized checklist reduces errors by 50%.</span></div>
+                    <div class="grid md:grid-cols-2 gap-5 mt-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border-l-8 border-periop"><strong><i class="fa-solid fa-user-nurse text-periop"></i> Circulating Nurse</strong><br><span class="reveal-text">• Coordinates OR activities, documents intraop events.<br>• Provides supplies, monitors environmental safety.<br>• Performs <span class="highlight-green">"time out" verification</span>, counts with scrub nurse.<br>• Advocates for patient during anesthesia.</span></div>
+                        <div class="bg-slate-50 p-4 rounded-xl border-l-8 border-cyan-600"><strong><i class="fa-solid fa-hand-holding-medical text-cyan-700"></i> Scrub Nurse / Technologist</strong><br><span class="reveal-text">• Sets up sterile instruments and drapes.<br>• Anticipates surgeon’s needs, passes instruments.<br>• Maintains integrity of sterile field, handles specimens.<br>• Assists in counting sponges, needles, instruments.</span></div>
+                    </div>
+                    <div class="info-box"><i class="fa-regular fa-chart-line"></i> <strong>Key Statistics (AORN):</strong> <span class="reveal-text">Retained surgical items occur in 1 per 5,500 surgeries; 88% are sponges. Proper counts and X‑ray when discrepancy occurs reduce risk by 95%.</span></div>
+                    <canvas id="complicationChart" width="400" height="200" style="max-width:100%; margin-top:1rem;"></canvas>
+                    <button onclick="openQuiz('overview')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl shadow-md hover:bg-slate-700">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 2. INTRAOPERATIVE PHASES (enhanced table) -->
+            <section id="clinical" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-periop pb-3"><i class="fa-solid fa-chart-simple text-periop mr-4"></i> Intraoperative Phases (Anesthesia & Surgery)</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm border-collapse border shadow-md">
+                            <thead class="bg-periop text-white"><tr><th class="p-3">Phase</th><th class="p-3">Key Nursing Focus</th><th class="p-3">⚠️ Potential Risks</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-slate-50 hover:bg-slate-100"><td class="border p-2 font-bold">Pre‑induction</td><td class="reveal-text">Verification (consent, site marking), IV access, safety devices, preoperative checklist</td><td class="reveal-text highlight-red">Wrong site, allergy, aspiration</td></tr>
+                                <tr class="bg-white hover:bg-slate-100"><td class="border p-2 font-bold">Induction & Intubation</td><td class="reveal-text">Assist anesthesia, cricoid pressure if needed, position patient, secure airway</td><td class="reveal-text highlight-red">Hypotension, hypoxia, dental trauma</td></tr>
+                                <tr class="bg-slate-50 hover:bg-slate-100"><td class="border p-2 font-bold">Maintenance (Surgical phase)</td><td class="reveal-text">Aseptic technique, surgical counts, fluid/blood management, positioning, monitoring</td><td class="reveal-text highlight-red">Hypothermia, fluid overload, nerve injury, retained items</td></tr>
+                                <tr class="bg-white hover:bg-slate-100"><td class="border p-2 font-bold">Emergence & Transfer</td><td class="reveal-text">Safe extubation, prevent injury, handoff to PACU, document final counts</td><td class="reveal-text highlight-red">Delirium, airway obstruction, hemodynamic instability</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="success-box mt-4"><i class="fa-regular fa-clock"></i> <strong>WHO Surgical Safety Checklist:</strong> <span class="reveal-text font-bold">Sign In (before anesthesia) → Time Out (before incision) → Sign Out (before patient leaves OR).</span> Proven to reduce complications by 30%.</div>
+                    <button onclick="openQuiz('clinical')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 3. KEY NURSING RESPONSIBILITIES (bold risk highlights) -->
+            <section id="phases" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-periop pb-3"><i class="fa-solid fa-list-check text-periop mr-4"></i> Key Intraoperative Nursing Responsibilities</h2>
+                    <div class="grid md:grid-cols-3 gap-5">
+                        <div class="bg-red-50 p-4 rounded-xl shadow"><strong class="text-red-800"><i class="fa-solid fa-hand-sparkles"></i> Aseptic Technique</strong><br><span class="reveal-text">• Sterile gown/glove application, draping.<br>• <span class="highlight-red">One-inch border rule</span>, only sterile-to-sterile contact.<br>• <span class="font-bold">Never turn back to sterile field.</span></span></div>
+                        <div class="bg-amber-50 p-4 rounded-xl shadow"><strong class="text-amber-800"><i class="fa-solid fa-wheelchair"></i> Positioning & Safety</strong><br><span class="reveal-text">• Prevent nerve damage (ulnar, brachial plexus, peroneal).<br>• Use padding, safety straps, avoid pressure points.<br>• <span class="highlight-red">Trendelenburg, lithotomy, prone</span> – each has specific risks.</span></div>
+                        <div class="bg-green-50 p-4 rounded-xl shadow"><strong class="text-green-800"><i class="fa-solid fa-calculator"></i> Surgical Counts</strong><br><span class="reveal-text">• Sponges, sharps, instruments counted <span class="highlight-green">three times</span> (initial, before closure, after skin closure).<br>• Discrepancy → immediate X‑ray, notify surgeon.<br>• <span class="font-bold">Never bypass count.</span></span></div>
+                    </div>
+                    <div class="warning-box mt-3"><i class="fa-solid fa-temperature-low"></i> <strong>Preventing hypothermia:</strong> <span class="reveal-text">Forced‑air warmer, warmed IV fluids, increase ambient temperature, cover exposed areas. <span class="highlight-red">Hypothermia increases SSI risk by 300%.</span></span></div>
+                    <canvas id="tempChart" width="400" height="200" style="max-width:100%; margin-top:1rem;"></canvas>
+                    <button onclick="openQuiz('phases')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 4. COMPLICATIONS (emergency protocols in red) -->
+            <section id="warning" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-periop pb-3"><i class="fa-solid fa-triangle-exclamation text-periop mr-4"></i> Intraoperative Complications & Early Recognition</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="bg-red-100 p-4 rounded-xl border-l-8 border-red-700"><strong class="text-red-900">🚨 Malignant Hyperthermia (MH)</strong><br><span class="reveal-text">• Triggered by succinylcholine/volatile anesthetics.<br>• Early signs: <span class="font-bold">masseter spasm, tachycardia, hypercapnia, rigidity, hyperthermia.</span><br>• <span class="highlight-red">Immediate dantrolene (2.5 mg/kg IV), stop triggers, hyperventilate, cold IV fluids.</span></span></div>
+                        <div class="bg-blue-100 p-4 rounded-xl border-l-8 border-blue-700"><strong class="text-blue-900">⚠️ Hemorrhage / Hypovolemia</strong><br><span class="reveal-text">• Signs: tachycardia, hypotension, decreased urine output, pale field.<br>• Nursing: large bore IV, fluid resuscitation, blood products, communicate with surgeon.</span></div>
+                        <div class="bg-amber-100 p-4 rounded-xl"><strong class="text-amber-900">❄️ Hypothermia (core <36°C)</strong><br><span class="reveal-text">→ coagulopathy, SSI, prolonged recovery. <span class="highlight-red">Forced-air warmer + warmed fluids mandatory.</span></span></div>
+                        <div class="bg-purple-100 p-4 rounded-xl"><strong class="text-purple-900">🧠 Nerve Injury Prevention</strong><br><span class="reveal-text">• Brachial plexus: arms ≤90° abduction, padding. Peroneal: avoid lithotomy stirrup pressure. Document baseline neuro status.</span></div>
+                    </div>
+                    <div class="warning-box"><i class="fa-regular fa-bell"></i> <strong>MH EMERGENCY DRILL:</strong> <span class="reveal-text">Call for dantrolene, change anesthesia circuit, hyperventilate with 100% O₂, administer cold saline, monitor for arrhythmias.</span></div>
+                    <button onclick="openQuiz('warning')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 5. SAFETY & ASEPTIC MANAGEMENT (highlighted protocols) -->
+            <section id="management" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-periop pb-3"><i class="fa-solid fa-thermometer-half text-periop mr-4"></i> Safety & Aseptic Management</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="bg-indigo-50 p-4 rounded-xl"><strong><i class="fa-regular fa-hand-peace"></i> Universal Protocol (Time Out)</strong><br><span class="reveal-text">• Verify patient identity, procedure, site, consent, implants, allergies, equipment availability.<br>• <span class="highlight-green">Performed immediately before incision with entire team.</span><br>• Mandatory by Joint Commission.</span></div>
+                        <div class="bg-pink-50 p-4 rounded-xl"><strong><i class="fa-solid fa-biohazard"></i> Sterile Technique Violations</strong><br><span class="reveal-text">• Turn away from field, moisture wicking, below waist is unsterile.<br>• Re‑gown/reglove if contamination occurs.<br>• Double gloving recommended for high‑risk cases.</span></div>
+                    </div>
+                    <div class="success-box"><i class="fa-regular fa-clock"></i> <strong>Antibiotic prophylaxis (AORN):</strong> <span class="reveal-text">Administer within <span class="highlight-green">60 minutes before incision</span> (vancomycin 120 min). Redose at 2 half‑lives (e.g., cefazolin every 4 hours).</span></div>
+                    <button onclick="openQuiz('management')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 6. NURSING CARE & SURGICAL COUNTS (detailed) -->
+            <section id="nursing" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-periop pb-3"><i class="fa-solid fa-clipboard-list text-periop mr-4"></i> Nursing Care & Surgical Counts</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Documentation:</strong> <span class="reveal-text">Intraoperative record: vital signs q5‑15min, fluids, medications, implants, counts, positioning, skin assessment.</span></li>
+                        <li><strong>Sponge/Sharps Count Protocol:</strong> <span class="reveal-text highlight-green">Baseline count before incision → first closure count → final closure count → skin closure.</span> All counts must match; <span class="highlight-red">X‑ray if mismatch before leaving OR.</span></li>
+                        <li><strong>Specimen Management:</strong> <span class="reveal-text">Label correctly in surgeon’s presence, use sterile container, verify with surgeon, send to lab with requisition immediately.</span></li>
+                        <li><strong>Preventing Pressure Injury:</strong> <span class="reveal-text">Use gel pads, reposition if possible, assess high‑risk areas (occiput, sacrum, heels).</span></li>
+                    </ul>
+                    <div class="info-box"><i class="fa-regular fa-heart"></i> <strong>Mnemonic “SPONGE” for counts:</strong> <span class="reveal-text font-bold">Separate counts, Perform X‑ray if needed, Observe field, Notify team, Give final verification, End with correct count.</span></div>
+                    <button onclick="openQuiz('nursing')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 7. SSI PREVENTION & WHO CHECKLIST -->
+            <section id="prevention" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-periop pb-3"><i class="fa-solid fa-shield-virus text-periop mr-4"></i> SSI Prevention & Safety Checklist</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="bg-lime-50 p-4 rounded-xl"><strong>🛡️ Preoperative bundle</strong><br><span class="reveal-text">• Shower with antiseptic night before, <span class="highlight-red">avoid razors (clippers only).</span><br>• Glucose control (<180 mg/dL), smoking cessation, decolonization if MRSA carrier.</span></div>
+                        <div class="bg-lime-50 p-4 rounded-xl"><strong>📋 Intraoperative measures</strong><br><span class="reveal-text">• Maintain normothermia (36‑38°C), administer appropriate antibiotics, use sterile drapes, minimize OR traffic.<br>• Perform surgical hand antisepsis for 2‑5 minutes.</span></div>
+                        <div class="bg-lime-50 p-4 rounded-xl"><strong>🚪 Postoperative closure</strong><br><span class="reveal-text">• Use sterile dressing, keep intact for 24‑48h, monitor for infection signs (erythema, purulent drainage).</span></div>
+                        <div class="bg-lime-50 p-4 rounded-xl"><strong>📝 WHO Checklist Core</strong><br><span class="reveal-text">Sign In, Time Out, Sign Out. Reduces mortality and complications by >30%.</span></div>
+                    </div>
+                    <div class="warning-box"><i class="fa-regular fa-lightbulb"></i> <strong>Key insight:</strong> <span class="reveal-text">Team huddle before incision (“Time Out”) is <span class="highlight-red">the last line of defense against wrong‑site surgery</span>.</span></div>
+                    <button onclick="openQuiz('prevention')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 8. FLASHCARDS & MNEMONICS (expanded cards) -->
+            <section id="flashcards" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-periop pb-3"><i class="fa-solid fa-cards text-periop mr-4"></i> Flashcards & Mnemonics</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-periop">Q: Role of circulating nurse?</div><div class="flash-answer hidden mt-2">Coordinates OR, documents, maintains safety, assists team, performs Time Out.</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-periop">Q: When is surgical Time Out performed?</div><div class="flash-answer hidden mt-2">Immediately before incision (after draping).</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-periop">Q: Signs of malignant hyperthermia?</div><div class="flash-answer hidden mt-2">Masseter spasm, tachycardia, hypercapnia, rigidity, hyperthermia.</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-periop">Q: First-line drug for MH?</div><div class="flash-answer hidden mt-2">Dantrolene sodium (2.5 mg/kg IV). Repeat as needed.</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-periop">Q: How many surgical counts required?</div><div class="flash-answer hidden mt-2">3 times: initial, before wound closure, after skin closure.</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-periop">Q: Best position to prevent brachial plexus injury?</div><div class="flash-answer hidden mt-2">Arms abducted ≤90°, supine with padded arm boards.</div></div>
+                    </div>
+                    <div class="mt-6 bg-amber-50 p-4 rounded-xl shadow"><strong>🧠 Essential Mnemonics</strong><br>
+                        <span class="reveal-text">• <span class="font-bold">“TIME OUT”</span> – Team introduction, Identity, Method, Equipment, Operative site, Universal protocol.<br>
+                        • <span class="font-bold">“SPONGE”</span> – Count safety.<br>
+                        • <span class="font-bold">“MH”</span> – Masseter spasm, Hyperthermia, Hypercarbia, Tachycardia.<br>
+                        • <span class="font-bold">“COUNTS”</span> – Communicate, Organize, Use X‑ray, Notify, Two‑person verification, Sign off.
+                    </span></div>
+                    <button onclick="openQuiz('flashcards')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Final Exam</button>
+                </div>
+            </section>
+
+            <!-- FINAL EXAM -->
+            <section id="final_quiz_sec" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 text-center min-h-[60vh] flex flex-col justify-center items-center">
+                    <i class="fa-solid fa-graduation-cap text-8xl text-amber-500 mb-6"></i>
+                    <h2 class="text-4xl font-black text-slate-800 mb-4">Final 50‑Item Exam: Intraoperative Nursing</h2>
+                    <p class="text-lg text-slate-600 mb-8 max-w-2xl">Covers OR team roles, phases, aseptic technique, complications, safety counts, MH, SSI prevention, and WHO checklist. Score ≥75% to pass.</p>
+                    <button onclick="openQuiz('final_quiz')" class="w-full max-w-md bg-slate-800 text-white font-black py-4 rounded-xl shadow-md text-xl">Start Final Exam</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- QUIZ MODAL (full quiz logic remains, but enhanced with red/green feedback) -->
+    <div id="quiz-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeQuiz()" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h2 id="quiz-title" class="text-3xl font-black text-slate-800 mb-2"></h2>
+            <div id="quiz-questions-container" class="space-y-4 mt-4"></div>
+            <button id="quiz-submit-btn" onclick="submitQuiz()" class="mt-8 w-full bg-periop text-white font-bold py-4 rounded-xl shadow-lg">Submit Answers</button>
+            <div id="quiz-result-container" class="hidden mt-6 p-4 rounded-xl bg-slate-100"></div>
+        </div>
+    </div>
+
+    <script>
+        // QUIZZES DEFINITIONS (same comprehensive sets as previously but we ensure 10 per section)
+        let unlockedSections = ['home'];
+        const quizzes = {
+            overview: { title: "Overview & Team Roles", next: "clinical", questions: [
+                { q: "Which role is responsible for maintaining the sterile field and passing instruments?", options: ["Circulating nurse", "Scrub nurse", "Anesthesia provider", "Surgeon"], ans: 1 },
+                { q: "The surgical Time Out is performed:", options: ["Before anesthesia induction", "Immediately before skin incision", "After skin closure", "In PACU"], ans: 1 },
+                { q: "Who documents intraoperative events and coordinates OR team?", options: ["Scrub person", "Circulating nurse", "First assistant", "Surgeon"], ans: 1 },
+                { q: "Which action violates sterile technique?", options: ["Turning back to sterile field", "Hands above waist", "Gown cuffs sterile", "Draping dry surface"], ans: 0 },
+                { q: "The WHO checklist Sign In occurs:", options: ["Before induction", "Before incision", "Before leaving OR", "After closing"], ans: 0 },
+                { q: "Which of the following is a responsibility of the scrub nurse?", options: ["Verify consent", "Count sponges with circulator", "Administer medication", "Position patient"], ans: 1 },
+                { q: "The AORN recommended maximum arm abduction to prevent brachial plexus injury is:", options: ["45°", "90°", "120°", "180°"], ans: 1 },
+                { q: "Wrong-site surgery prevention relies heavily on:", options: ["Surgeon memory", "Active Time Out and site marking", "Patient consent only", "Nurse alone"], ans: 1 },
+                { q: "Which team member performs the initial surgical count?", options: ["Circulator alone", "Scrub and circulator together", "Anesthesia", "Surgeon"], ans: 1 },
+                { q: "Double gloving is recommended for:", options: ["All surgeries", "High-risk/orthopedic procedures", "Only laparoscopic", "Never"], ans: 1 }
+            ]},
+            clinical: { title: "Intraoperative Phases", next: "phases", questions: [
+                { q: "The phase from anesthesia induction to emergence is called:", options: ["Preoperative", "Intraoperative maintenance", "Postoperative", "Pre‑induction"], ans: 1 },
+                { q: "During which phase are surgical counts first performed?", options: ["Before anesthesia", "After draping but before incision", "After incision", "Before closure"], ans: 1 },
+                { q: "Cricoid pressure is applied during induction to prevent:", options: ["Hypotension", "Aspiration", "Hypertension", "Laryngospasm"], ans: 1 },
+                { q: "Emergence phase priority nursing action:", options: ["Ensure patent airway, prepare for safe extubation", "Start surgical count", "Apply sterile drapes", "Administer antibiotic"], ans: 0 },
+                { q: "Which of the following occurs during the ‘Sign Out’ (WHO checklist)?", options: ["Patient identity", "Review of specimen, counts, concerns", "Site marking", "Antibiotic administration"], ans: 1 },
+                { q: "Hypothermia most commonly occurs during:", options: ["Pre‑induction", "Maintenance phase (exposure + anesthesia)", "Emergence", "PACU"], ans: 1 },
+                { q: "The period after skin closure until transfer to PACU is known as:", options: ["Induction", "Emergence and transfer", "Sign In", "Pre‑op"], ans: 1 },
+                { q: "Positioning the patient in lithotomy increases risk of:", options: ["Ulnar nerve injury", "Peroneal nerve injury", "Brachial plexus injury", "Facial nerve injury"], ans: 1 },
+                { q: "A key responsibility during induction is:", options: ["Count sponges", "Assist anesthesia with airway & vital signs", "Set up back table", "Perform Time Out"], ans: 1 },
+                { q: "Who performs the final verification of surgical counts?", options: ["Surgeon alone", "Scrub nurse and circulating nurse together", "Anesthesia", "Radiology"], ans: 1 }
+            ]},
+            phases: { title: "Key Nursing Responsibilities", next: "warning", questions: [
+                { q: "The sterile one-inch border of the drape is considered:", options: ["Sterile", "Unsterile", "Clean", "Contaminated only if touched"], ans: 1 },
+                { q: "Which patient position carries risk of ulnar nerve compression?", options: ["Supine with arms tucked", "Supine with arms abducted >90°", "Lithotomy", "Prone"], ans: 1 },
+                { q: "The recommended method to warm a hypothermic patient intraoperatively is:", options: ["Apply warm blankets only", "Forced‑air warmer and warmed IV fluids", "Increase room temperature only", "Heat lamps"], ans: 1 },
+                { q: "Sponges, sharps, and instruments are counted:", options: ["Once at end of surgery", "Three times (initial, before closure, after closure)", "Only if surgeon requests", "Every 30 minutes"], ans: 1 },
+                { q: "If a count discrepancy occurs, the first action is:", options: ["Close the incision", "Notify surgeon & obtain X‑ray", "Document as correct", "Send patient to PACU"], ans: 1 },
+                { q: "Which intervention reduces risk of surgical site infection?", options: ["Administer antibiotics after incision", "Maintain normothermia", "Use razors for hair removal", "Increase OR traffic"], ans: 1 },
+                { q: "Sterile field should be set up:", options: ["As soon as patient enters OR", "Just before incision after patient positioned", "When surgeon arrives", "One hour before surgery"], ans: 1 },
+                { q: "Padding of bony prominences prevents:", options: ["Hypothermia", "Pressure injury and nerve damage", "Infection", "Bleeding"], ans: 1 },
+                { q: "Skin preparation solution (chlorhexidine) is applied by:", options: ["Circulator", "Scrub person or surgeon using sterile technique", "Anesthesia", "Nursing assistant"], ans: 1 },
+                { q: "Retained surgical item is most often a:", options: ["Needle", "Sponge", "Instrument", "Clamp"], ans: 1 }
+            ]},
+            warning: { title: "Complications & Early Signs", next: "management", questions: [
+                { q: "Early sign of Malignant Hyperthermia (MH) is:", options: ["Hypotension", "Masseter muscle rigidity", "Bradycardia", "Hypothermia"], ans: 1 },
+                { q: "First-line medication for MH crisis:", options: ["Succinylcholine", "Dantrolene", "Atropine", "Epinephrine"], ans: 1 },
+                { q: "Intraoperative hypothermia increases risk of:", options: ["SSI, coagulopathy, prolonged recovery", "Hypertension", "Seizure", "Anaphylaxis"], ans: 0 },
+                { q: "Which finding suggests intraoperative hemorrhage?", options: ["Bradycardia, hypertension", "Tachycardia, hypotension, pale surgical field", "Increased urine output", "Fever"], ans: 1 },
+                { q: "To prevent positioning nerve injury, the nurse should:", options: ["Avoid padding", "Place arms >90° abduction", "Use padded arm boards and neutral alignment", "Use lithotomy without stirrups"], ans: 2 },
+                { q: "Clinical manifestation of venous air embolism (laparoscopy):", options: ["Hypotension, arrhythmia, decreased EtCO₂", "Hypertension", "Fever", "Hyperthermia"], ans: 0 },
+                { q: "Late sign of MH is:", options: ["Tachycardia", "Hyperthermia (>41°C)", "Jaw rigidity", "Muscle relaxation"], ans: 1 },
+                { q: "Massive blood loss triggers which complication?", options: ["Fluid overload", "Hypovolemic shock", "Malignant hyperthermia", "Anaphylaxis"], ans: 1 },
+                { q: "The patient in lithotomy position is at risk for:", options: ["Compartment syndrome", "Hypothermia only", "Pulmonary embolism", "Nerve injury: common peroneal"], ans: 3 },
+                { q: "Sudden unexplained rise in end‑tidal CO₂ with rigidity suggests:", options: ["Light anesthesia", "Malignant Hyperthermia", "Pneumothorax", "Equipment error"], ans: 1 }
+            ]},
+            management: { title: "Safety & Aseptic Management", next: "nursing", questions: [
+                { q: "The Universal Protocol includes:", options: ["Time Out, site marking, patient verification", "Only antibiotic administration", "Count only", "Sign Out only"], ans: 0 },
+                { q: "Prophylactic antibiotics should be administered within ___ before incision:", options: ["30 min", "60 min (120 for vancomycin)", "2 hours", "Immediately after incision"], ans: 1 },
+                { q: "Which action is an aseptic violation?", options: ["Gown cuffs sterile", "Moisture strike-through", "Back table covered", "One‑inch border respected"], ans: 1 },
+                { q: "When should the surgical Time Out be performed?", options: ["After incision", "Before draping", "Immediately before incision with entire team", "In PACU"], ans: 2 },
+                { q: "Re-dosing of prophylactic antibiotic is required after:", options: ["2 half-lives of the drug", "4 hours", "At closure", "Never"], ans: 0 },
+                { q: "Which statement about sterile field is TRUE?", options: ["Only the top of draped table is sterile", "Entire table is sterile", "Below waist is sterile", "Edges of drapes are sterile"], ans: 0 },
+                { q: "The ‘Sign Out’ phase includes:", options: ["Checklist of specimen, counts, equipment issues", "Patient name and procedure", "Anesthesia consent", "Family update"], ans: 0 },
+                { q: "Clippers for hair removal should be used:", options: ["Morning of surgery", "Night before", "In OR immediately before prep", "Any time"], ans: 0 },
+                { q: "Which solution is preferred for surgical skin prep?", options: ["Alcohol alone", "Chlorhexidine‑alcohol combination", "Povidone‑iodine only", "Water"], ans: 1 },
+                { q: "The circulating nurse documents all EXCEPT:", options: ["Sponge counts", "Surgeon’s music preference", "Fluids and blood loss", "Positioning and skin assessment"], ans: 1 }
+            ]},
+            nursing: { title: "Nursing Care & Surgical Counts", next: "prevention", questions: [
+                { q: "How many times are sponges, sharps, and instruments counted?", options: ["1", "2", "3 (initial, before closure, after skin closure)", "4"], ans: 2 },
+                { q: "If the final count does not match, the nurse should:", options: ["Ignore and close", "Notify surgeon and request X‑ray of surgical site", "Document as correct", "Blame the scrub nurse"], ans: 1 },
+                { q: "Which is part of intraoperative documentation?", options: ["Vital signs, implants, counts, fluid balance", "Family medical history", "Discharge plan", "Insurance details"], ans: 0 },
+                { q: "Which of the following prevents corneal abrasion during anesthesia?", options: ["Eye lubricant and tape closed", "Leave eyes open", "No intervention", "Wash eyes"], ans: 0 },
+                { q: "The SPONGE mnemonic for surgical counts includes:", options: ["Separate counts, Perform X‑ray", "Suction, Pulse ox", "Sedate, Prep", "Skin check only"], ans: 0 },
+                { q: "Who is responsible for labeling and handling surgical specimen?", options: ["Surgeon only", "Scrub nurse and circulator in collaboration with surgeon", "Anesthesia", "PACU nurse"], ans: 1 },
+                { q: "Intraoperative pressure injury risk is highest at:", options: ["Sacrum, heels, occiput", "Abdomen", "Chest", "Forearms"], ans: 0 },
+                { q: "The scrub nurse should immediately discard any instrument that:", options: ["Falls onto floor", "Is unused", "Looks dull", "Is stainless steel"], ans: 0 },
+                { q: "Which finding indicates possible retained sponge?", options: ["Unexplained fever or pain postop", "Normal X‑ray", "Routine count correct", "Surgical site dry"], ans: 0 },
+                { q: "After closure, the intraoperative record must be:", options: ["Completed immediately by circulating nurse", "Delayed until next day", "Filled by surgeon", "Irrelevant"], ans: 0 }
+            ]},
+            prevention: { title: "SSI Prevention & Checklist", next: "flashcards", questions: [
+                { q: "The WHO Surgical Safety Checklist reduces complications by:", options: [">30%", "5%", "50%", "10%"], ans: 0 },
+                { q: "Which intervention reduces SSI risk?", options: ["Normothermia", "Hypothermia", "Uncontrolled glucose", "Prolonged OR time"], ans: 0 },
+                { q: "The ‘Sign In’ checklist is performed:", options: ["Before induction of anesthesia", "Before incision", "After skin closure", "In PACU"], ans: 0 },
+                { q: "Which of the following is NOT part of SSI prevention bundle?", options: ["Hair removal with razor", "Normothermia", "Glucose control", "Appropriate antibiotic timing"], ans: 0 },
+                { q: "The ‘Time Out’ verifies all EXCEPT:", options: ["Correct patient", "Correct procedure and site", "Surgeon's fee", "Implants and equipment"], ans: 2 },
+                { q: "Maintaining intraoperative glucose <180 mg/dL reduces:", options: ["SSI", "Hypothermia", "Bleeding", "Pain"], ans: 0 },
+                { q: "Surgical hand antisepsis should last at least:", options: ["15 seconds", "2-5 minutes depending on product", "30 seconds", "10 seconds"], ans: 1 },
+                { q: "Which antibiotic timing is correct for cefazolin?", options: ["Within 60 min before incision", "After incision", "At closure only", "24 hours before"], ans: 0 },
+                { q: "The ‘Sign Out’ includes review of:", options: ["Specimen labeling, counts, equipment concerns", "Anesthesia plan", "Pre‑op orders", "Consent form"], ans: 0 },
+                { q: "Which practice increases SSI risk?", options: ["Keeping OR doors closed", "Minimizing traffic", "Increasing number of people in OR", "Using sterile drapes"], ans: 2 }
+            ]},
+            flashcards: { title: "Mnemonics & Key Facts", next: "final_quiz_sec", questions: [
+                { q: "Mnemonic for intraoperative count safety is:", options: ["SPONGE", "C.A.R.E.", "4S", "TIME OUT"], ans: 0 },
+                { q: "In ‘TIME OUT’ mnemonic, ‘T’ stands for:", options: ["Team introduction", "Tachycardia", "Tourniquet", "Temperature"], ans: 0 },
+                { q: "Which drug is given for Malignant Hyperthermia?", options: ["Dantrolene", "Neostigmine", "Atropine", "Ephedrine"], ans: 0 },
+                { q: "The mnemonic for positioning nerve risk includes:", options: ["Avoid extreme abduction, padding, neutral alignment", "ABCDE", "FAST", "MONA"], ans: 0 },
+                { q: "MH early sign: Masseter muscle ____?", options: ["Spasm", "Relaxation", "Atrophy", "Pain"], ans: 0 },
+                { q: "The circulating nurse’s responsibility related to counts:", options: ["Verify with scrub and document", "Perform only alone", "Delegate to surgeon", "Ignore counts"], ans: 0 },
+                { q: "Standard padding for pressure points includes:", options: ["Gel pads, foam, pillows", "Metal boards", "Uncovered OR table", "Sandbags only"], ans: 0 },
+                { q: "The best method to prevent perioperative hypothermia:", options: ["Forced air warmer + warmed IV fluids", "Increase room temperature only", "Warm blankets only", "Give warm oral fluids"], ans: 0 },
+                { q: "What does the ‘C’ in C.A.R.E. (adapted) represent?", options: ["Circulatory assessment / Counts", "Clean", "Cold", "Cautery"], ans: 0 },
+                { q: "Antibiotic redose interval for cefazolin is:", options: ["4 hours", "1 hour", "8 hours", "24 hours"], ans: 0 }
+            ]}
+        };
+        let finalQ = [];
+        for(let sec of ['overview','clinical','phases','warning','management','nursing','prevention','flashcards']) finalQ.push(...quizzes[sec].questions.slice(0,6));
+        while(finalQ.length < 50) finalQ.push({ q: "The single most effective intervention to prevent retained surgical items is:", options: ["Verbal and documented counts at three intervals", "Relying on surgeon memory", "One count at end", "X‑ray only"], ans: 0 });
+        quizzes.final_quiz = { title: "Final 50‑Item Exam: Intraoperative Nursing", next: null, questions: finalQ };
+
+        let chart1=null, chart2=null;
+        function initCharts() {
+            const ctx1 = document.getElementById('complicationChart')?.getContext('2d');
+            if(ctx1 && !chart1) chart1 = new Chart(ctx1, { type:'bar', data:{ labels:['Hypothermia','Nerve Injury','MH','Hemorrhage','Retained Item'], datasets:[{ label:'Incidence per 10,000 surgeries', data:[120, 85, 3, 220, 8], backgroundColor:'#0f5c6b' }] }, options:{ responsive:true } });
+            const ctx2 = document.getElementById('tempChart')?.getContext('2d');
+            if(ctx2 && !chart2) chart2 = new Chart(ctx2, { type:'line', data:{ labels:['Induction','30 min','60 min','90 min','Emergence'], datasets:[{ label:'Core Temp (°C)', data:[36.8,36.2,35.9,35.7,36.1], borderColor:'#ef4444', fill:false, tension:0.3 }] }, options:{ responsive:true } });
+        }
+        function toggleFlash(el) { const ans = el.querySelector('.flash-answer'); if(ans) ans.classList.toggle('hidden'); }
+        function unlockFirstSection() { if(!unlockedSections.includes('overview')) { unlockedSections.push('overview'); updateSidebarUI(); } showSection('overview'); }
+        function showSection(id) { if(!unlockedSections.includes(id) && id!=='home') { alert("Complete the quiz at the bottom of the previous section to unlock."); return; } document.querySelectorAll('.content-section').forEach(el=>el.classList.add('hidden')); document.getElementById(id)?.classList.remove('hidden'); document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.remove('bg-periop-light','text-periop-dark','border-r-4','border-periop-dark')); const btn=document.getElementById('btn-'+id); if(btn) btn.classList.add('bg-periop-light','text-periop-dark','border-r-4','border-periop-dark'); if(window.innerWidth<768) document.getElementById('sidebar').classList.add('hidden'); if((id==='overview'||id==='phases') && !chart1) setTimeout(initCharts,50); }
+        function updateSidebarUI() { ['home','overview','clinical','phases','warning','management','nursing','prevention','flashcards','final_quiz_sec'].forEach(sec=>{ const btn=document.getElementById('btn-'+sec); if(!btn) return; const lock=btn.querySelector('.fa-lock'), icon=btn.querySelector('.nav-icon'); if(unlockedSections.includes(sec)||sec==='home') { btn.classList.remove('locked-section'); if(lock) lock.classList.add('hidden'); if(icon) icon.classList.remove('hidden'); } else { btn.classList.add('locked-section'); if(lock) lock.classList.remove('hidden'); if(icon) icon.classList.add('hidden'); } }); }
+        function openQuiz(sectionId) { currentQuiz=sectionId; const qd=quizzes[sectionId]; if(!qd) return; document.getElementById('quiz-title').innerHTML=qd.title; const cont=document.getElementById('quiz-questions-container'); cont.innerHTML=''; qd.questions.forEach((q,idx)=>{ let html=`<div class="bg-slate-50 p-4 rounded-xl mb-4"><p class="font-bold mb-3">${idx+1}. ${q.q}</p><div class="space-y-2">`; q.options.forEach((opt,oi)=>{ html+=`<label class="flex items-center space-x-3 p-2 rounded-lg hover:bg-white cursor-pointer"><input type="radio" name="q${idx}" value="${oi}" class="form-radio text-periop"><span>${opt}</span></label>`; }); html+=`</div><div class="feedback-${idx} text-sm mt-2 hidden"></div></div>`; cont.innerHTML+=html; }); document.getElementById('quiz-submit-btn').classList.remove('hidden'); document.getElementById('quiz-result-container').classList.add('hidden'); document.getElementById('quiz-modal').classList.remove('hidden'); }
+        function closeQuiz() { document.getElementById('quiz-modal').classList.add('hidden'); }
+        function submitQuiz() { const qd=quizzes[currentQuiz]; if(!qd) return; let score=0; for(let i=0;i<qd.questions.length;i++){ const sel=document.querySelector(`input[name="q${i}"]:checked`); if(sel && parseInt(sel.value)===qd.questions[i].ans) score++; const fbDiv=document.querySelector(`.feedback-${i}`); if(fbDiv){ fbDiv.classList.remove('hidden'); const correctTxt=qd.questions[i].options[qd.questions[i].ans]; if(sel && parseInt(sel.value)===qd.questions[i].ans) { fbDiv.innerHTML='<span class="text-green-700">✓ Correct</span>'; fbDiv.parentElement?.classList.add('quiz-feedback-correct'); } else { const selectedTxt=sel?qd.questions[i].options[parseInt(sel.value)]:"No answer"; fbDiv.innerHTML=`<span class="text-red-700">✗ Incorrect. Correct: ${correctTxt}. You answered: ${selectedTxt}</span>`; fbDiv.parentElement?.classList.add('quiz-feedback-wrong'); } } } let percent=(score/qd.questions.length)*100; let resultDiv=document.getElementById('quiz-result-container'); document.getElementById('quiz-submit-btn').classList.add('hidden'); resultDiv.classList.remove('hidden'); if(percent>=75){ if(currentQuiz==='final_quiz'){ resultDiv.innerHTML=`<div class="text-green-600 text-4xl text-center">🎉 Excellent! Score ${score}/${qd.questions.length} (${percent}%)<br>You mastered Intraoperative Nursing</div><button onclick="closeQuiz()" class="mt-4 bg-periop text-white px-6 py-2 rounded-xl">Close</button>`; return; } if(quizzes[currentQuiz].next && !unlockedSections.includes(quizzes[currentQuiz].next)) unlockedSections.push(quizzes[currentQuiz].next); if(quizzes[currentQuiz].next === 'flashcards' && !unlockedSections.includes('final_quiz_sec')) unlockedSections.push('final_quiz_sec'); updateSidebarUI(); resultDiv.innerHTML=`<div class="text-green-600 text-3xl text-center">✅ Passed! (${score}/${qd.questions.length})</div><button onclick="closeQuiz(); showSection('${quizzes[currentQuiz].next}')" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-xl">Unlock Next Section</button>`; } else { resultDiv.innerHTML=`<div class="text-red-600 text-3xl text-center">❌ Failed: ${score}/${qd.questions.length} (${percent}%)<br>Need 75%</div><button onclick="openQuiz('${currentQuiz}')" class="mt-4 bg-slate-600 text-white px-6 py-2 rounded-xl">Try Again</button>`; } }
+        function toggleRecallMode() { const active=!document.body.classList.contains('recall-mode'); const toggle=document.getElementById('recall-toggle'),knob=document.getElementById('recall-knob'); if(active){ document.body.classList.add('recall-mode'); toggle.classList.add('bg-periop-dark'); knob.classList.add('translate-x-6'); } else { document.body.classList.remove('recall-mode'); toggle.classList.remove('bg-periop-dark'); knob.classList.remove('translate-x-6'); } }
+        function toggleMobileMenu() { const s=document.getElementById('sidebar'); if(s.classList.contains('hidden')) s.classList.remove('hidden','flex','absolute','h-full','z-50'); else s.classList.add('hidden'); }
+        document.addEventListener('DOMContentLoaded',()=>{ updateSidebarUI(); document.querySelectorAll('.reveal-text').forEach(el=>el.addEventListener('click',function(){ if(document.body.classList.contains('recall-mode')) this.classList.toggle('revealed'); })); });
+    </script>
+</body>
+</html>
